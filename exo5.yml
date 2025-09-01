@@ -1,0 +1,191 @@
+openapi: 3.0.3
+info:
+  title: Products & Orders API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: Products
+    description: Operations related to products
+  - name: Orders
+    description: Operations related to orders
+
+paths:
+  /products:
+    get:
+      tags:
+        - Products
+      summary: Search for products
+      parameters:
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/QParam'
+      responses:
+        '200':
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+              examples:
+                multipleProducts:
+                  summary: Result with several products
+                  value:
+                    - name: Organic apple
+                      expiration_datetime: "2025-09-10T10:00:00Z"
+                      price: 1.2
+                    - name: Whole wheat bread
+                      expiration_datetime: "2025-09-02T18:00:00Z"
+                      price: 2.5
+                emptyList:
+                  summary: Empty result
+                  value: []
+
+  /orders:
+    get:
+      tags:
+        - Orders
+      summary: Paginated list of orders
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+      responses:
+        '200':
+          description: List of orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+              examples:
+                example1:
+                  summary: A few orders
+                  value:
+                    - identifier: 101
+                      customer_name: Alice
+                      creation_datetime: "2025-09-01T09:00:00Z"
+                      total_amount: 35.5
+                    - identifier: 102
+                      customer_name: Bob
+                      creation_datetime: "2025-09-02T12:30:00Z"
+                      total_amount: 89.9
+    post:
+      tags:
+        - Orders
+      summary: Create a new order
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+            examples:
+              exampleOrder:
+                summary: Example order to create
+                value:
+                  identifier: 103
+                  customer_name: Charlie
+                  creation_datetime: "2025-09-03T14:15:00Z"
+                  total_amount: 120.0
+      responses:
+        '201':
+          description: Order successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+              examples:
+                createdOrder:
+                  summary: Response with the created order
+                  value:
+                    identifier: 103
+                    customer_name: Charlie
+                    creation_datetime: "2025-09-03T14:15:00Z"
+                    total_amount: 120.0
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+
+  parameters:
+    LimitParam:
+      name: limit
+      in: query
+      description: Maximum number of items to return
+      required: false
+      schema:
+        type: integer
+        example: 10
+    QParam:
+      name: q
+      in: query
+      description: Search term
+      required: false
+      schema:
+        type: string
+        example: apple
+    PageParam:
+      name: page
+      in: query
+      description: Page number (starts at 1)
+      required: false
+      schema:
+        type: integer
+        example: 1
+    SizeParam:
+      name: size
+      in: query
+      description: Page size (number of items per page)
+      required: false
+      schema:
+        type: integer
+        example: 20
+
+  schemas:
+    Product:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Organic apple
+        expiration_datetime:
+          type: string
+          format: date-time
+          example: "2025-09-10T10:00:00Z"
+        price:
+          type: number
+          format: float
+          example: 1.2
+      required:
+        - name
+        - expiration_datetime
+        - price
+
+    Order:
+      type: object
+      properties:
+        identifier:
+          type: integer
+          example: 101
+        customer_name:
+          type: string
+          example: Alice
+        creation_datetime:
+          type: string
+          format: date-time
+          example: "2025-09-01T09:00:00Z"
+        total_amount:
+          type: number
+          format: float
+          example: 35.5
+      required:
+        - identifier
+        - customer_name
+        - creation_datetime
+        - total_amount

@@ -1,0 +1,71 @@
+openapi: 3.0.3
+info:
+  title: API Products
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+paths:
+  /products:
+    get:
+      summary: products sarching
+      parameters:
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/QParam'
+      responses:
+        '200':
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+              examples:
+                multipleProducts:
+                  summary: result of products
+                  value:
+                    - name: Pomme bio
+                      expiration_datetime: "2025-09-10T10:00:00Z"
+                      price: 1.2
+                    - name: Pain complet
+                      expiration_datetime: "2025-09-02T18:00:00Z"
+                      price: 2.5
+                emptyList:
+                  value: []
+
+components:
+  parameters:
+    LimitParam:
+      name: limit
+      in: query
+      description: Maximum number of element returned
+      required: false
+      schema:
+        type: integer
+        example: 10
+    QParam:
+      name: q
+      in: query
+      required: false
+      schema:
+        type: string
+        example: pomme
+  schemas:
+    Product:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Pomme bio
+        expiration_datetime:
+          type: string
+          format: date-time
+          example: "2025-09-10T10:00:00Z"
+        price:
+          type: number
+          format: float
+          example: 1.2
+      required:
+        - name
+        - expiration_datetime
+        - price
